@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plastc Life: Run Plastc Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0E1512; --card:#18231E; --card2:#1F2D27; --line:#2A3A33;
+  --text:#FFFFFF; --muted:#A9B8B1;
+  --mint:#3DDC97; --orange:#FF6B35; --blue:#4EA8DE; --yellow:#FFD23F; --pink:#F25F9C; --red:#FF4D5E;
+  --r:18px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{font-size:clamp(13px,1.05vw,22px)}
+body{background:var(--bg);color:var(--text);font-family:"DM Sans",system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+h1,h2,h3,.disp{font-family:"Bricolage Grotesque","DM Sans",sans-serif;letter-spacing:-.02em}
+button{font-family:inherit;cursor:pointer;border:none;color:inherit}
+#specks{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+#specks i{position:absolute;border-radius:50%;opacity:.55;animation:drift 18s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translate(30px,-40px) rotate(40deg)}}
+.screen{position:relative;z-index:1;min-height:100vh}
+.hidden{display:none!important}
+
+/* ---------- START ---------- */
+#start{display:flex;align-items:center;justify-content:center;padding:3rem}
+.start-wrap{display:grid;grid-template-columns:1.1fr 1fr;gap:3rem;max-width:1400px;width:100%;align-items:center}
+.kicker{color:var(--mint);font-weight:700;letter-spacing:.2em;font-size:.85rem;text-transform:uppercase}
+.logo{font-size:5.6rem;font-weight:800;line-height:.95;margin:.6rem 0 1rem}
+.logo span{color:var(--mint)}
+.tag{font-size:1.35rem;color:var(--muted);max-width:32rem;line-height:1.45}
+.howto{display:flex;gap:.8rem;margin-top:2rem;flex-wrap:wrap}
+.howto div{background:var(--card);border-radius:14px;padding:.8rem 1rem;font-size:.95rem;color:var(--muted);flex:1;min-width:10rem}
+.howto b{display:block;color:var(--text);font-size:1.05rem;margin-bottom:.2rem}
+.setup{background:var(--card);border-radius:28px;padding:2rem;box-shadow:0 30px 80px #0007}
+.setup h3{font-size:1.4rem;margin-bottom:1rem}
+.label{font-size:.8rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:1.2rem 0 .5rem}
+.seg{display:flex;gap:.5rem;flex-wrap:wrap}
+.seg button{background:var(--card2);padding:.65rem 1rem;border-radius:12px;font-weight:700;font-size:1rem;border:2px solid transparent;transition:.15s}
+.seg button.on{border-color:var(--mint);background:#3ddc9722;color:var(--mint)}
+.teams{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.teams input{background:var(--card2);border:2px solid var(--line);border-radius:12px;padding:.6rem .8rem;color:var(--text);font:inherit;font-weight:700;font-size:1rem;width:100%}
+.big{display:block;width:100%;margin-top:1.6rem;background:var(--mint);color:#0E1512;font-weight:800;font-size:1.4rem;padding:1.1rem;border-radius:18px;font-family:"Bricolage Grotesque",system-ui,sans-serif;transition:transform .15s,box-shadow .15s;box-shadow:0 8px 0 #22a26a}
+.big:hover{transform:translateY(-2px)}
+.big:active{transform:translateY(5px);box-shadow:0 3px 0 #22a26a}
+
+/* ---------- GAME ---------- */
+#game{display:grid;grid-template-rows:auto 1fr;height:100vh;padding:1.1rem 1.4rem;gap:1rem}
+.topbar{display:flex;align-items:center;gap:1rem}
+.brand{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:1.5rem}
+.brand span{color:var(--mint)}
+.yearchip{background:var(--card);border-radius:999px;padding:.45rem 1.1rem;font-weight:800;font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:1.3rem}
+.yearchip small{color:var(--muted);font-size:.8rem;font-weight:700;letter-spacing:.12em;margin-right:.4rem;font-family:"DM Sans",system-ui,sans-serif}
+.progress{flex:1;height:10px;background:var(--card);border-radius:99px;overflow:hidden;max-width:22rem}
+.progress div{height:100%;background:linear-gradient(90deg,var(--mint),var(--blue));border-radius:99px;transition:width .6s}
+.prog-label{color:var(--muted);font-weight:700;font-size:.9rem}
+.spacer{flex:1}
+.scores{display:flex;gap:.5rem}
+.score{background:var(--card);border-radius:14px;padding:.4rem .9rem;display:flex;gap:.6rem;align-items:center;border:2px solid transparent;transition:.2s}
+.score.active{border-color:var(--yellow);box-shadow:0 0 0 4px #ffd23f22}
+.score .n{font-weight:700;font-size:.95rem}
+.score .p{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:1.3rem}
+.iconbtn{background:var(--card);width:2.6rem;height:2.6rem;border-radius:12px;font-size:1.15rem}
+
+.main{display:grid;grid-template-columns:24rem 1fr;gap:1.2rem;min-height:0}
+.side{display:flex;flex-direction:column;gap:1rem;min-height:0}
+.profile{background:var(--card);border-radius:var(--r);padding:1.2rem;display:flex;gap:1rem;align-items:center}
+.avatar{width:4.6rem;height:4.6rem;border-radius:50%;background:conic-gradient(var(--mint),var(--blue),var(--pink),var(--yellow),var(--orange),var(--mint));display:grid;place-items:center;font-size:2.3rem;flex-shrink:0;position:relative}
+.avatar::after{content:"";position:absolute;inset:5px;border-radius:50%;background:var(--card2);z-index:0}
+.avatar span{position:relative;z-index:1}
+.pname{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:1.35rem}
+.prole{color:var(--muted);font-size:.95rem}
+.bank{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:1.25rem;color:var(--mint);margin-top:.15rem}
+.stats{background:var(--card);border-radius:var(--r);padding:1.2rem;display:flex;flex-direction:column;gap:1rem}
+.stat .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.35rem}
+.stat .nm{font-weight:700;font-size:1.05rem}
+.stat .val{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:1.15rem}
+.bar{height:16px;background:#0E1512;border-radius:99px;overflow:hidden;position:relative}
+.bar div{height:100%;border-radius:99px;transition:width .8s cubic-bezier(.2,.9,.3,1.2)}
+.stat.flash-up .bar{box-shadow:0 0 0 3px #3ddc9799}
+.stat.flash-down .bar{box-shadow:0 0 0 3px #ff4d5e99}
+.stat .delta{font-size:.95rem;font-weight:800;margin-left:.4rem;opacity:0;transition:opacity .3s}
+.stat .delta.show{opacity:1}
+.tip{background:var(--card);border-radius:var(--r);padding:1rem 1.2rem;color:var(--muted);font-size:.9rem;line-height:1.45;margin-top:auto}
+.tip b{color:var(--text)}
+
+.feedwrap{background:var(--card);border-radius:var(--r);display:flex;flex-direction:column;min-height:0;position:relative;overflow:hidden}
+.feed{flex:1;overflow-y:auto;padding:1.4rem 1.6rem 7rem;scroll-behavior:smooth}
+.feed::-webkit-scrollbar{width:8px}.feed::-webkit-scrollbar-thumb{background:var(--line);border-radius:9px}
+.yr{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:1.3rem;margin:1.1rem 0 .5rem;color:var(--mint)}
+.yr:first-child{margin-top:0}
+.ent{font-size:1.1rem;line-height:1.5;padding:.15rem 0;color:#DCE6E1;animation:pop .4s ease}
+.ent.good{color:var(--mint)}.ent.bad{color:#FF8C95}.ent.evt{color:var(--yellow)}
+@keyframes pop{from{opacity:0;transform:translateY(8px)}}
+.agebtn{position:absolute;left:50%;bottom:1.3rem;transform:translateX(-50%);display:flex;align-items:center;gap:.8rem;background:var(--mint);color:#0E1512;font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:1.45rem;padding:.9rem 2.2rem;border-radius:999px;box-shadow:0 8px 0 #22a26a,0 20px 50px #3ddc9744;transition:transform .15s}
+.agebtn:hover{transform:translateX(-50%) translateY(-3px)}
+.agebtn:active{transform:translateX(-50%) translateY(5px)}
+.agebtn .plus{width:2.3rem;height:2.3rem;border-radius:50%;background:#0E1512;color:var(--mint);display:grid;place-items:center;font-size:1.6rem;line-height:1}
+.agebtn.pulse{animation:pulse 1.6s infinite}
+@keyframes pulse{50%{box-shadow:0 8px 0 #22a26a,0 0 0 16px #3ddc9722}}
+
+/* ---------- MODAL ---------- */
+.overlay{position:fixed;inset:0;background:#050807cc;backdrop-filter:blur(6px);z-index:10;display:flex;align-items:center;justify-content:center;padding:2rem}
+.modal{background:var(--card);border-radius:28px;width:min(66rem,96vw);max-height:94vh;overflow-y:auto;box-shadow:0 40px 120px #000a;animation:rise .35s cubic-bezier(.2,.9,.3,1.2);position:relative}
+@keyframes rise{from{opacity:0;transform:translateY(30px) scale(.97)}}
+.mhead{padding:1.3rem 2rem .8rem;display:flex;gap:1.2rem;align-items:flex-start}
+.memoji{font-size:3rem;line-height:1;width:4.4rem;height:4.4rem;border-radius:22px;background:var(--card2);display:grid;place-items:center;flex-shrink:0}
+.mmeta{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.35rem}
+.pill{font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.3rem .7rem;border-radius:99px;background:var(--card2);color:var(--muted)}
+.pill.c{background:#4ea8de22;color:var(--blue)}
+.pill.t{background:#ffd23f22;color:var(--yellow)}
+.mtitle{font-size:2.1rem;font-weight:800;line-height:1.1}
+.mtext{padding:0 2rem 1rem;font-size:1.3rem;line-height:1.5;color:#E3ECE7}
+.timer{margin:0 2rem 1rem;height:8px;background:var(--bg);border-radius:9px;overflow:hidden}
+.timer div{height:100%;background:var(--yellow);width:100%}
+.timer.out div{background:var(--red);animation:blink .5s infinite}
+@keyframes blink{50%{opacity:.3}}
+.choices{padding:0 2rem 1.2rem;display:grid;gap:.55rem}
+.ch{display:flex;gap:1rem;align-items:center;text-align:left;background:var(--card2);border:2px solid var(--line);border-radius:16px;padding:.75rem 1.1rem;font-size:1.2rem;line-height:1.32;transition:.15s;font-weight:500}
+.ch:hover:not(:disabled){border-color:var(--mint);transform:translateX(4px)}
+.ch .k{width:2.4rem;height:2.4rem;border-radius:12px;background:var(--bg);display:grid;place-items:center;font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;flex-shrink:0;font-size:1.2rem}
+.ch.wrong{opacity:.45;text-decoration:line-through;border-color:var(--red)}
+.ch.right{border-color:var(--mint);background:#3ddc9722}
+.ch.right .k{background:var(--mint);color:#0E1512}
+.ch:disabled{cursor:default}
+.result{margin:0 2rem 1.2rem;border-radius:18px;padding:1.2rem 1.4rem;animation:rise .3s}
+.result.good{background:#3ddc9718;border:2px solid #3ddc9755}
+.result.bad{background:#ff4d5e18;border:2px solid #ff4d5e55}
+.result.neutral{background:#ffd23f14;border:2px solid #ffd23f44}
+.result h4{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:1.5rem;margin-bottom:.35rem}
+.result p{font-size:1.15rem;line-height:1.5;color:#E3ECE7}
+.fx{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.8rem}
+.fx span{font-weight:800;padding:.3rem .7rem;border-radius:99px;font-size:1rem;background:var(--bg)}
+.fx .u{color:var(--mint)}.fx .d{color:#FF8C95}
+.mfoot{display:flex;justify-content:flex-end;gap:.8rem;padding:0 2rem 1.5rem}
+.btn{background:var(--mint);color:#0E1512;font-weight:800;font-size:1.2rem;padding:.85rem 1.8rem;border-radius:14px;font-family:"Bricolage Grotesque",system-ui,sans-serif;box-shadow:0 5px 0 #22a26a}
+.btn.ghost{background:var(--card2);color:var(--text);box-shadow:0 5px 0 #0a100d}
+.btn:active{transform:translateY(4px);box-shadow:none}
+.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-10px)}40%,80%{transform:translateX(10px)}}
+
+/* path cards */
+.paths{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;padding:0 2rem 1.8rem}
+.path{background:var(--card2);border:2px solid var(--line);border-radius:20px;padding:1.3rem;text-align:left;transition:.2s;display:flex;flex-direction:column;gap:.5rem}
+.path:hover{transform:translateY(-6px)}
+.path .e{font-size:2.6rem}
+.path h3{font-size:1.4rem}
+.path p{color:var(--muted);font-size:1rem;line-height:1.4}
+.path .pc{font-size:.95rem;line-height:1.45;margin-top:.3rem}
+.path .pc b{display:block;font-size:.75rem;letter-spacing:.12em;margin-top:.4rem}
+
+/* ---------- END ---------- */
+#end{padding:2.5rem 3rem;max-width:1500px;margin:0 auto}
+.endgrid{display:grid;grid-template-columns:1.2fr 1fr;gap:1.5rem;margin-top:1.5rem}
+.card{background:var(--card);border-radius:24px;padding:1.6rem}
+.verdict{font-size:3.6rem;font-weight:800;line-height:1;margin:.4rem 0 .8rem}
+.epi{font-size:1.25rem;line-height:1.55;color:#E3ECE7}
+.board .rowx{display:flex;align-items:center;gap:1rem;padding:.8rem 0;border-bottom:1px solid var(--line);font-size:1.3rem}
+.board .rowx:last-child{border:none}
+.board .medal{font-size:1.8rem;width:2.4rem}
+.board .pts{margin-left:auto;font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:1.6rem}
+.statsum{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;margin-top:1.2rem}
+.statsum div{background:var(--card2);border-radius:16px;padding:.9rem;text-align:center}
+.statsum b{display:block;font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:2rem}
+.statsum span{color:var(--muted);font-size:.85rem;font-weight:700}
+.recap{margin-top:1.5rem}
+.recap h2{font-size:2rem;margin-bottom:1rem}
+.rq{background:var(--card);border-radius:18px;padding:1.1rem 1.4rem;margin-bottom:.7rem;display:grid;grid-template-columns:auto 1fr auto;gap:1rem;align-items:start}
+.rq .num{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:1.4rem;color:var(--muted);width:2.2rem}
+.rq .q{font-weight:700;font-size:1.1rem;margin-bottom:.3rem}
+.rq .a{color:var(--mint);font-size:1.1rem;line-height:1.4}
+.rq .l{color:var(--muted);font-size:.98rem;margin-top:.3rem;line-height:1.4}
+.rq .tries{font-weight:800;font-size:.85rem;padding:.3rem .7rem;border-radius:99px;white-space:nowrap}
+.tries.t1{background:#3ddc9722;color:var(--mint)}.tries.t2{background:#ffd23f22;color:var(--yellow)}.tries.t3{background:#ff4d5e22;color:#FF8C95}
+canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:20}
+</style>
+</head>
+<body>
+<div id="specks"></div>
+<canvas id="confetti"></canvas>
+
+<!-- START -->
+<section id="start" class="screen">
+  <div class="start-wrap">
+    <div>
+      <div class="kicker">ENTM 240 · Case game</div>
+      <h1 class="logo">Plastc<br><span>Life</span></h1>
+      <p class="tag">You are Ralph and Rami Sbeih. Run Plastc Lab from Beirut's 2015 garbage crisis to 2030. Every choice moves your cash, impact, trust and energy. Pick the best answer to move forward.</p>
+      <div class="howto">
+        <div><b>➕ Next year</b>Each click brings a new year and a new dilemma</div>
+        <div><b>🎯 Best answer</b>100 pts first try, 50 second, 20 third</div>
+        <div><b>🎲 Every run differs</b>Random events, and wrong moves come back to haunt you</div>
+      </div>
+    </div>
+    <div class="setup">
+      <h3>Set up the game</h3>
+      <div class="label">Who's playing?</div>
+      <div class="seg" id="teamSeg">
+        <button data-n="1">Whole class</button><button data-n="2" class="on">2 teams</button><button data-n="3">3 teams</button><button data-n="4">4 teams</button>
+      </div>
+      <div class="label" id="teamLabel">Team names</div>
+      <div class="teams" id="teamInputs"></div>
+      <div class="label">Answer timer</div>
+      <div class="seg" id="timerSeg">
+        <button data-t="0">Off</button><button data-t="30">30 sec</button><button data-t="45" class="on">45 sec</button><button data-t="60">60 sec</button>
+      </div>
+      <button class="big" id="startBtn">Start the life of Plastc Lab →</button>
+    </div>
+  </div>
+</section>
+
+<!-- GAME -->
+<section id="game" class="screen hidden">
+  <div class="topbar">
+    <div class="brand">Plastc <span>Life</span></div>
+    <div class="yearchip"><small>YEAR</small><span id="yearTxt">2015</span></div>
+    <div class="progress"><div id="progBar" style="width:0%"></div></div>
+    <div class="prog-label" id="progTxt">0 / 0</div>
+    <div class="spacer"></div>
+    <div class="scores" id="scores"></div>
+    <button class="iconbtn" id="soundBtn" title="Sound">🔊</button>
+    <button class="iconbtn" id="fsBtn" title="Full screen">⛶</button>
+  </div>
+  <div class="main">
+    <div class="side">
+      <div class="profile">
+        <div class="avatar"><span>♻️</span></div>
+        <div>
+          <div class="pname">Plastc Lab</div>
+          <div class="prole">Ralph &amp; Rami Sbeih, founders</div>
+          <div class="bank" id="bankTxt">$40,000</div>
+        </div>
+      </div>
+      <div class="stats" id="stats"></div>
+      <div class="tip" id="tipBox"><b>Keys:</b> 1–4 to answer · Enter to continue · Space for next year</div>
+    </div>
+    <div class="feedwrap">
+      <div class="feed" id="feed"></div>
+      <button class="agebtn pulse" id="ageBtn"><span class="plus">+</span><span id="ageLbl">Start in 2015</span></button>
+    </div>
+  </div>
+</section>
+
+<!-- END -->
+<section id="end" class="screen hidden"></section>
+
+<div class="overlay hidden" id="overlay"><div class="modal" id="modal"></div></div>
+
+<script>
+/* =========================================================
+   CONTENT
+   fx keys: c = cash, i = impact, t = trust, e = energy
+   ========================================================= */
+const STAGES = [
+ { pool:[{
+  id:"continuum", year:2015, emoji:"🗑️", tag:"Social entrepreneurship continuum", title:"Beirut is drowning in trash",
+  text:"Garbage piles up on Beirut's streets and nobody trusts recycling anymore. You and your brother want to act. Where do you put your venture on the continuum?",
+  choices:[
+   {t:"Pure charity: live on donations and give recycled items away", fx:{c:-10,e:-5}, fb:"Donations dry up fast in a crisis. No earned income means no independence."},
+   {t:"Social enterprise: sell recycled products, and let the income fund the mission", best:true, fx:{c:5,i:5,t:5}, fb:"Right. Plastc Lab is a hybrid in the middle of the continuum: commercial sales serving an environmental mission.", log:"Founded the idea of a recycling social enterprise."},
+   {t:"Traditional business: maximise profit, sustainability is a side note", fx:{t:-10}, fb:"Then why recycled plastic? You'd fight Panda Plast on price with no mission edge."},
+   {t:"Activism only: protest and lobby the government", fx:{i:-5,e:-5}, fb:"The 'You Stink' protests didn't fix waste. Activism alone creates no tangible product."}
+  ],
+  learn:"Plastc Lab sits mid-continuum: a social enterprise that uses earned income to fund an environmental mission."}]},
+
+ { pool:[{
+  id:"precious", year:2017, emoji:"🌍", tag:"Mission & identity", title:"Precious Plastic Lebanon",
+  text:"You start as part of Precious Plastic, a global maker network from the Netherlands. After a while, it feels wrong for Lebanon. Why launch your own brand?",
+  choices:[
+   {t:"Their focus is making recycled products as a lifestyle; Lebanon needs to cut waste out of necessity", best:true, fx:{i:5,e:5}, fb:"Exactly Sbeih's point: they recycle for luxury, we recycle out of necessity. New mission, new brand.", log:"Left Precious Plastic to build a brand around reducing Lebanon's waste."},
+   {t:"To copy their designs and sell them cheaper", fx:{t:-5}, fb:"Not the reason, and it would burn the community you came from."},
+   {t:"Because Precious Plastic was making too much money", fx:{e:-5}, fb:"Money wasn't the issue. Mission fit was."},
+   {t:"To get government subsidies only local brands receive", fx:{c:-5}, fb:"There are no such subsidies in Lebanon. That's one of the case's core problems."}
+  ],
+  learn:"They split from Precious Plastic because Lebanon needed a mission focused on reducing waste, not just producing recycled goods."}]},
+
+ { pool:[{
+  id:"grant", year:2019, emoji:"💰", tag:"Resource allocation", title:"Your first Berytech grant",
+  text:"Berytech, a Lebanese support organization for entrepreneurs, gives you your first grant. How do you spend it?",
+  choices:[
+   {t:"Build machines in-house and develop sellable products", best:true, fx:{i:5,c:5}, fb:"What they did. In-house machines keep maintenance cheap and fit the circular economy.", log:"Used the Berytech grant to build machines and prototypes."},
+   {t:"Import a full European production line", fx:{c:-15}, fb:"Expensive, energy hungry and hard to repair in Lebanon. They imported just one machine."},
+   {t:"Pay yourselves salaries for a year", fx:{c:-10}, fb:"Grant money is for building the venture. Without products, it just vanishes."},
+   {t:"A big billboard campaign before you have products", fx:{c:-10,t:-5}, fb:"Awareness with nothing to sell burns cash and trust."}
+  ],
+  learn:"Grants went into building machines in-house and developing sellable products."},
+ {
+  id:"legal", year:2019, emoji:"⚖️", tag:"Legal status", title:"Registering the company",
+  text:"Lebanon has no special legal form for social enterprises. How do you register Plastc Lab?",
+  choices:[
+   {t:"As a for-profit company with the social mission built into its identity", best:true, fx:{c:5,t:5}, fb:"You can sell products, sign contracts and take investors later, while the mission guides decisions.", log:"Registered Plastc Lab as a mission-driven company."},
+   {t:"As an NGO that only takes donations and grants", fx:{c:-10}, fb:"An NGO can't raise equity. Investors would later see a charity, not a business."},
+   {t:"Don't register, stay informal", fx:{t:-10,c:-5}, fb:"No contracts with hotels or municipalities, no grants, no investors."},
+   {t:"Register abroad and forget Lebanon", fx:{i:-10}, fb:"Your raw material, your mission and your market are all in Lebanon."}
+  ],
+  learn:"Legal status: a for-profit company with a social mission (hybrid) keeps the door open to sales and investors."}]},
+
+ { pool:[{
+  id:"municipal", year:2020, emoji:"🏛️", tag:"Business model pivot", title:"The municipality deal",
+  text:"Model 1: municipalities give you plastic waste, you return recycled park benches. After 3 months with 9 municipalities, the waste is dirty and mixed, and nobody pays. What now?",
+  choices:[
+   {t:"Pivot: source clean, pre-sorted industrial packaging waste", best:true, fx:{i:10,c:5}, fb:"The 2021 pivot. Industrial waste is clean and sorted, so supply becomes steady and usable.", log:"Pivoted from municipal trash to clean industrial waste."},
+   {t:"Sign 10 more municipalities to get more volume", flag:"overextended", fx:{c:-10,e:-10}, fb:"More dirty waste and more unpaid work. Volume doesn't fix quality."},
+   {t:"Buy an expensive washing and sorting plant", fx:{c:-15}, fb:"Huge spending you can't afford. Fix the source, not the symptom."},
+   {t:"Ask households to sort their trash at home", fx:{t:-5,e:-5}, fb:"People don't trust recycling, and public bins mix everything anyway."}
+  ],
+  learn:"The municipal model failed (dirty mixed waste, no subsidies), so they pivoted to clean industrial waste."}]},
+
+ { pool:[{
+  id:"toc", year:2020, emoji:"🧭", tag:"Theory of change", title:"Write your theory of change",
+  text:"A funder asks for your theory of change. Complete it: IF Plastc Lab turns Lebanon's plastic waste into durable, well-designed products people can see and use… THEN…",
+  choices:[
+   {t:"…less plastic ends up in dumps and landfills, and people start trusting recycling", best:true, fx:{i:5,t:5}, fb:"It links what you do to the long-term change you want: less waste and a shift in mindset.", log:"Wrote a theory of change: products people see → less waste, more trust in recycling."},
+   {t:"…Plastc Lab will sell 1,000 picnic tables", fx:{t:-5}, fb:"That's an output, not the social change you're aiming for."},
+   {t:"…the government will pass recycling laws", fx:{t:-5}, fb:"Outside your control, and not what your activities directly cause."},
+   {t:"…the founders will become famous entrepreneurs", fx:{e:-5}, fb:"A theory of change is about social impact, not personal fame."}
+  ],
+  learn:"Theory of change: IF we make waste into visible, durable products, THEN landfill waste drops and trust in recycling grows."},
+ {
+  id:"stake", year:2020, emoji:"🗺️", tag:"Stakeholder map", title:"Map your stakeholders",
+  text:"Where does the Lebanese government sit on your stakeholder map?",
+  choices:[
+   {t:"High power, low interest: keep satisfied and try to engage", best:true, fx:{t:5}, fb:"It could change everything with laws and subsidies, but has shown little interest in impact businesses.", log:"Mapped the government as high power, low interest."},
+   {t:"High power, high interest: a key partner", fx:{e:-5}, fb:"If only. There are no green subsidies or climate laws helping you."},
+   {t:"Low power, high interest: just keep informed", fx:{t:-5}, fb:"The state holds huge power over waste and regulation."},
+   {t:"Low power, low interest: ignore them", fx:{t:-5}, fb:"Never ignore the actor that controls waste policy."}
+  ],
+  learn:"Stakeholder map: the government is high power but low interest, so keep it satisfied and try to engage it."}]},
+
+ { pool:[{
+  id:"team", year:2021, emoji:"🔧", tag:"Team building", title:"A third partner joins",
+  text:"Production is growing and machines keep breaking. Who do you bring in as your third partner?",
+  choices:[
+   {t:"A mechanical engineer to run production and maintain machines", best:true, fx:{i:5,e:10}, fb:"Ralph Borgi joined in 2021 as production manager. Engineers who build and fix their own machines keep costs low.", log:"Ralph Borgi joined as third partner and production manager."},
+   {t:"A celebrity influencer", fx:{c:-5}, fb:"Nice buzz, but your bottleneck is production."},
+   {t:"A full-time accountant", fx:{c:-5}, fb:"Part-time accounting covers it. Your bottleneck is machines."},
+   {t:"Nobody, the brothers can do it all", fx:{e:-15}, fb:"Burnout incoming."}
+  ],
+  learn:"Ralph Borgi, a mechanical engineer, joined in 2021 to lead production."},
+ {
+  id:"capacity", year:2021, emoji:"🏭", tag:"Operations", title:"How big should the factory be?",
+  text:"Your 350 m² factory (about one tennis court) has 2 extruders and 3 sheet presses. Why keep capacity low at 45 tonnes a month?",
+  choices:[
+   {t:"To focus on R&D and keep energy-hungry machinery costs down", best:true, fx:{c:5,i:5}, fb:"A deliberate strategy: energy in Lebanon is expensive and R&D is your edge.", log:"Kept capacity at 45 t/month to focus on R&D."},
+   {t:"Because there isn't enough plastic waste in Lebanon", fx:{t:-5}, fb:"Sbeih says there's enough waste for 20 years even if plastic production stopped today."},
+   {t:"Because the law caps recycling factories", fx:{e:-5}, fb:"No such law. Lebanon barely regulates the sector."},
+   {t:"To look exclusive", fx:{t:-5}, fb:"Capacity is an operations choice, not a branding stunt."}
+  ],
+  learn:"Low capacity (45 t/month) was deliberate: focus on R&D and minimize energy-intensive machinery costs."}]},
+
+ { pool:[{
+  id:"canvas", year:2022, emoji:"🧩", tag:"Social Lean Canvas", title:"Your unfair advantage",
+  text:"Filling in your Social Lean Canvas: what goes in the Unfair Advantage box, something competitors can't easily copy?",
+  choices:[
+   {t:"In-house machines plus years of know-how with different plastic types", best:true, fx:{i:5,c:5}, fb:"Hard to copy, cuts maintenance costs, and lets you rescue even contaminated batches.", log:"Defined the unfair advantage: in-house machines and plastic know-how."},
+   {t:"We are eco-friendly", fx:{t:-5}, fb:"Everyone claims that. Cedar Environmental is eco-friendly and bigger."},
+   {t:"Our low prices", fx:{c:-5}, fb:"You're 5–10% more expensive than competitors."},
+   {t:"Our 500 Instagram followers", fx:{e:-5}, fb:"Easy to copy, and not a moat."}
+  ],
+  learn:"Social Lean Canvas unfair advantage: in-house built machines and deep know-how with plastic types."},
+ {
+  id:"logframe", year:2022, emoji:"📊", tag:"Logical framework", title:"Pick your indicator",
+  text:"Your logframe outcome: 'Less plastic waste in Lebanese landfills.' Which indicator measures it best?",
+  choices:[
+   {t:"Kilograms of plastic recycled per year", best:true, fx:{i:10}, fb:"Measurable and verifiable: exactly what they track, 120 tonnes since 2019.", log:"Started tracking kg of plastic recycled per year."},
+   {t:"Number of Instagram likes", fx:{t:-5}, fb:"Measures attention, not waste diverted."},
+   {t:"Number of team meetings held", fx:{e:-5}, fb:"That's an activity, not an outcome."},
+   {t:"How green the founders feel", fx:{t:-5}, fb:"Not objective, not verifiable."}
+  ],
+  learn:"Logframe indicator: kg of plastic recycled per year (objectively verifiable)."}]},
+
+ { pool:[{
+  id:"rumours", year:2022, emoji:"🧪", tag:"Market perception", title:"Microplastic rumours go viral",
+  text:"Blogs claim recycled plastic releases microplastics. Customers stop buying your kitchen products. What do you do?",
+  choices:[
+   {t:"Test your line with a local university, share results, and shift to furniture and designer pieces", best:true, fx:{t:10}, fb:"What Plastc Lab did: build credibility with science and move away from the category people feared.", log:"Partnered with a university on safety tests; moved away from kitchen products."},
+   {t:"Ignore it, rumours fade", flag:"ignoredRumours", fx:{t:-15}, fb:"Silence looks like guilt. Perception is your biggest barrier."},
+   {t:"Sue the bloggers", fx:{c:-10,t:-5}, fb:"Expensive, slow, and makes you look defensive."},
+   {t:"Cut kitchen product prices by 50%", flag:"priceCut", fx:{c:-10,t:-5}, fb:"Cheaper doesn't fix fear. It confirms 'recycled = low quality'."}
+  ],
+  learn:"Facing perception problems, they tested safety with a university and refocused on furniture and design."}]},
+
+ { pool:[{
+  id:"pricing", year:2023, emoji:"🪑", tag:"Pricing & value", title:"The café order",
+  text:"A café wants 20 picnic tables. Your price: $280. A wood or virgin plastic table: $250. The owner says you're too expensive.",
+  choices:[
+   {t:"Sell the value: weatherproof, durable, low maintenance, a story guests love; offer volume terms but never below cost", best:true, fx:{c:10,t:5}, fb:"Your premium covers energy, rent, labour and R&D. Sell lifetime value and sustainability, not the sticker price.", log:"Won a 20-table café order at a premium price."},
+   {t:"Match $250 whatever it costs", flag:"priceCut", fx:{c:-10}, fb:"Your premium exists to cover costs. Below cost means losing money on every table."},
+   {t:"Refuse the order, they don't get it", fx:{c:-5,t:-5}, fb:"Lost revenue and a lost ambassador."},
+   {t:"Hide that it's recycled so they don't worry", fx:{t:-10}, fb:"Sustainability is your selling point. Hiding it kills your edge."}
+  ],
+  learn:"Premium pricing (5–10% above competitors) is justified by durability and sustainability; selling value beats price cuts."}]},
+
+ { pool:[{
+  id:"revenue", year:2023, emoji:"🏦", tag:"Revenue model", title:"The grants are running out",
+  text:"Nine grants of $5k–$35k kept you alive, but you've never been profitable and the founders hold other jobs. What's your revenue model from now on?",
+  choices:[
+   {t:"Earned income: product sales plus custom commissions and design collabs, with grants only as a bridge", best:true, fx:{c:10,e:5}, fb:"Grants are finite. Sales and commissions are a sustainable engine.", log:"Shifted to earned income: sales, commissions, design collabs."},
+   {t:"Apply for even more grants", flag:"moreGrants", fx:{c:-5}, fb:"Grants were never meant to sustain the business, and political unrest can cut them."},
+   {t:"Ask customers for donations", fx:{t:-5}, fb:"In a crisis economy, people pay for products, not causes."},
+   {t:"Give products away for exposure", fx:{c:-10}, fb:"Exposure doesn't pay the generator bill."}
+  ],
+  learn:"Revenue model: direct sales plus commissions and design collaborations; grants are a bridge, not a model."},
+ {
+  id:"investor", year:2023, emoji:"🤝", tag:"Financing", title:"The investor meeting",
+  text:"A local investor likes you, but wants quick returns and doesn't care about recycling. He offers $20k for 70% of the company.",
+  choices:[
+   {t:"Decline politely and target impact investors and development funds that value environmental return", best:true, fx:{e:5,c:5}, fb:"Local investors are risk-averse. Impact investors and partners like GIZ and KfW fit your longer path to profit.", log:"Turned down a bad deal; started courting impact investors."},
+   {t:"Take it, money is money", flag:"badEquity", fx:{e:-15}, fb:"You'd lose control of your mission for a tiny cheque."},
+   {t:"Promise profits in 6 months to close the deal", fx:{t:-10}, fb:"Overpromising destroys trust when you miss."},
+   {t:"Rebrand away from recycling to please him", fx:{i:-10}, fb:"That throws away your only real differentiator."}
+  ],
+  learn:"Local investors want quick returns; Plastc Lab fits impact investors with patient capital."}]},
+
+ { pool:[{
+  id:"compete", year:2023, emoji:"⚔️", tag:"Competitive positioning", title:"The giants",
+  text:"Panda Plast (since 1978) sells 500+ cheap virgin plastic products. Cedar Environmental (since 1999) is profitable and diversified. How do you compete?",
+  choices:[
+   {t:"Superior design plus a strong sustainability story", best:true, fx:{t:10}, fb:"The only viable position: you can't beat Panda on price or Cedar on scale.", log:"Positioned on design and sustainability, not price."},
+   {t:"Undercut Panda Plast on price", flag:"undercutPanda", fx:{c:-15}, fb:"A MENA giant with mass production wins every price war."},
+   {t:"Diversify into fertilizer and construction like Cedar", fx:{c:-10,e:-5}, fb:"Cedar has decades of experience. You'd spread yourself thin."},
+   {t:"Avoid competition by selling only abroad", fx:{i:-5}, fb:"Your mission is Lebanon's waste problem."}
+  ],
+  learn:"Positioning: compete on superior design and a sustainability narrative, not price or diversification."}]},
+
+ { pool:[{
+  id:"wedesign", year:2024, emoji:"✨", tag:"Growth & marketing", title:"We Design Beirut",
+  text:"Your designer collab, Magma Plastic, shines at We Design Beirut. 500 new Instagram followers overnight. Best next move?",
+  choices:[
+   {t:"Turn the buzz into revenue: a limited designer line and follow-ups with every lead you met", best:true, fx:{c:10,t:5}, fb:"Attention only matters if you convert it into sales and partnerships.", log:"Turned We Design buzz into a designer line and new leads."},
+   {t:"Post more and wait for orders", fx:{e:-5}, fb:"Followers aren't customers."},
+   {t:"Spend everything on paid ads", fx:{c:-10}, fb:"Burns scarce cash."},
+   {t:"Celebrate and take a month off", fx:{t:-5}, fb:"Momentum fades fast."}
+  ],
+  learn:"After We Design (+500 followers), convert attention into sales through designer collaborations."}]},
+];
+
+const DECISION = {
+  id:"decision", year:2024, emoji:"🧭", tag:"July 2024 · The big decision", title:"Choose Plastc Lab's identity",
+  text:"You can't do all three. Investors want one clear direction. Who is Plastc Lab from now on? (No single right answer: your choice writes your ending.)",
+  paths:[
+   {k:"design", e:"💎", n:"Design studio", d:"Drop picnic tables. Only designer collabs and art pieces for high-income buyers.", pro:"High margins, prestige brand, no mass-market fight", con:"Tiny niche, depends on outside designers, won't change public mindset", fx:{c:5,t:5,i:-5}, col:"var(--pink)"},
+   {k:"factory", e:"🏭", n:"Industrial manufacturer", d:"B2B for cafés, hotels and municipalities. A few high-volume products, new machines.", pro:"Big orders, clear path to profit, prices −30%, more plastic recycled", con:"Price war with Panda Plast, heavy investment, loses design identity", fx:{c:-10,i:15,e:-5}, col:"var(--blue)"},
+   {k:"movement", e:"🎓", n:"Educational movement", d:"Campaigns, school and university workshops, pop-ups to build trust.", pro:"Tackles the root barrier, loyal community, true to mission", con:"Slowest, most expensive, looks like an NGO to investors", fx:{t:15,c:-15}, col:"var(--yellow)"}
+  ]
+};
+
+const PATHQ = {
+ design:[
+  {id:"d1", year:2025, emoji:"🎨", tag:"Option 1 risk", title:"Designers hold the keys",
+   text:"As a design studio, your growth depends on outside designers' creativity. How do you reduce that risk?",
+   choices:[
+    {t:"Build a roster of designers on revenue-sharing deals and grow your own in-house design R&D", best:true, fx:{c:10,e:5}, fb:"Spreads the dependency and builds a capability you own.", log:"Built a designer roster and in-house design R&D."},
+    {t:"Bet everything on one star designer", fx:{e:-10}, fb:"One person leaves and your whole company leaves with them."},
+    {t:"Copy international designer pieces", fx:{t:-15}, fb:"Kills a prestige brand overnight."},
+    {t:"Stop paying designers, offer 'exposure'", fx:{t:-10}, fb:"Good designers walk away."}
+   ], learn:"Design studio risk: reduce dependence on third-party designers with a roster and in-house capability."},
+  {id:"d2", year:2026, emoji:"🛍️", tag:"Option 1 growth", title:"Reaching premium buyers",
+   text:"Your market is small and wealthy. How do you sell?",
+   choices:[
+    {t:"Limited editions at design fairs and galleries, each piece telling its story (how much waste is inside)", best:true, fx:{c:10,t:10}, fb:"Scarcity plus a traceable impact story justifies premium prices.", log:"Launched numbered limited editions with impact stories."},
+    {t:"Flash discounts on online marketplaces", fx:{t:-10}, fb:"Discounting destroys the premium positioning."},
+    {t:"Mass-produce the designer pieces", fx:{c:-10}, fb:"Mass production is the opposite of this strategy."},
+    {t:"Sell mainly to municipalities", fx:{c:-5}, fb:"Wrong customer for high-end design."}
+   ], learn:"Premium design sells through scarcity, curation and a traceable sustainability story."}
+ ],
+ factory:[
+  {id:"f1", year:2025, emoji:"🏗️", tag:"Option 2 risk", title:"Funding the machines",
+   text:"Scaling needs new machinery to reach a 30% price drop. How do you fund it?",
+   choices:[
+    {t:"Lock in B2B pre-orders from hotels, cafés and municipalities, then raise impact or blended finance against them", best:true, fx:{c:15,i:5}, fb:"Signed demand de-risks the investment and attracts patient capital.", log:"Raised impact finance backed by B2B pre-orders."},
+    {t:"Keep collecting $5k grants", fx:{c:-5,e:-5}, fb:"Far too small and too slow for industrial scale."},
+    {t:"Take a high-interest loan from a Lebanese bank mid-crisis", fx:{c:-15}, fb:"In Lebanon's banking crisis this is a trap."},
+    {t:"Spend personal savings and hope", fx:{e:-15}, fb:"Hope is not a financing strategy."}
+   ], learn:"Scaling requires big upfront investment: de-risk it with pre-orders and patient impact capital."},
+  {id:"f2", year:2026, emoji:"📉", tag:"Option 2 competition", title:"Panda strikes back",
+   text:"Panda Plast slashes its outdoor furniture prices. Hotels start hesitating.",
+   choices:[
+    {t:"Compete on total cost of ownership and durability, and help hotels hit their sustainability goals", best:true, fx:{c:10,t:5}, fb:"You win on value over years, not on the sticker price.", log:"Won hotel contracts on durability and sustainability value."},
+    {t:"Cut prices below Panda's", fx:{c:-20}, fb:"A race to the bottom against a giant ends one way."},
+    {t:"Abandon B2B and go back to consumers", fx:{e:-10}, fb:"You just invested in machines for B2B."},
+    {t:"Attack Panda on social media", fx:{t:-10}, fb:"Looks petty and invites a fight you can't win."}
+   ], learn:"Against low-cost giants, sell lifetime value and sustainability credentials, not price."}
+ ],
+ movement:[
+  {id:"m1", year:2025, emoji:"🎤", tag:"Option 3 risk", title:"Paying for education",
+   text:"Workshops and pop-ups cost money and earn nothing directly. How do you fund them?",
+   choices:[
+    {t:"Hybrid: paid corporate and school workshops, CSR sponsorships, and product sales at every pop-up", best:true, fx:{c:15,t:5}, fb:"Education becomes a revenue line and a sales channel.", log:"Turned workshops into paid programs and pop-up sales."},
+    {t:"Run everything free on personal savings", fx:{c:-15,e:-10}, fb:"Unsustainable within a year."},
+    {t:"Charge students high fees", fx:{t:-10}, fb:"Kills the movement you're trying to build."},
+    {t:"Stop selling products and become an NGO", fx:{c:-10}, fb:"Now investors are definitely gone."}
+   ], learn:"Option 3 needs a hybrid revenue model so education pays for itself."},
+  {id:"m2", year:2026, emoji:"📋", tag:"Option 3 investors", title:"\"You look like an NGO\"",
+   text:"Traditional investors say you look like an NGO, not a business. How do you change their mind?",
+   choices:[
+    {t:"Show a logframe: workshops → trust scores → sales conversion, alongside growing earned revenue", best:true, fx:{c:10,t:5}, fb:"Measured outcomes plus revenue prove that education drives growth.", log:"Showed investors data linking education to sales."},
+    {t:"Tell them impact matters more than money", fx:{e:-5}, fb:"True for you, unconvincing for them."},
+    {t:"Hide the education work", fx:{t:-10}, fb:"That's your whole strategy."},
+    {t:"Give up on investors entirely", fx:{c:-10}, fb:"Then growth stalls."}
+   ], learn:"Prove the education strategy with measurable outcomes linked to revenue."}
+ ]
+};
+
+const RANDOM = [
+ {emoji:"💸", title:"The lira collapses", text:"Lebanon's currency crashes. Imported parts and energy cost far more.", fx:{c:-10}, years:[2019,2020,2021]},
+ {emoji:"💥", title:"Beirut Port blast", text:"August 2020. The city is shaken, and the team pauses for weeks to help friends and family.", fx:{e:-15}, years:[2020], fixed:true},
+ {emoji:"🏨", title:"A hotel calls", text:"A seaside hotel orders 12 picnic tables after seeing your work.", fx:{c:10,t:5}, years:[2022,2023,2024]},
+ {emoji:"📱", title:"Your reel goes viral", text:"A video of your shredder turning bottles into a bench hits 200k views.", fx:{t:8,e:5}, years:[2021,2022,2023]},
+ {emoji:"⛽", title:"Fuel prices spike", text:"Generator fuel doubles. Running the extruders hurts.", fx:{c:-8}, years:[2021,2022]},
+ {emoji:"🧯", title:"Contaminated batch", text:"A dirty batch of plastic arrives, but your know-how with plastic types saves it.", fx:{i:5,e:5}, years:[2022,2023]},
+ {emoji:"🙌", title:"Student volunteers", text:"University students volunteer at the factory for a semester.", fx:{e:10}, years:[2021,2022,2023]},
+ {emoji:"🌱", title:"You inspire others", text:"Young entrepreneurs cite Plastc Lab's resilience as their inspiration.", fx:{e:6,t:5}, years:[2023,2024]}
+];
+
+const CONSEQ = {
+ overextended:{emoji:"🚛", title:"Your past catches up", text:"Those extra municipal contracts left unpaid trucking bills and piles of unusable mixed waste.", fx:{c:-10}},
+ ignoredRumours:{emoji:"📉", title:"Boycott", text:"Because you stayed silent, a viral video calls your products 'toxic'. Orders get cancelled.", fx:{t:-10}},
+ priceCut:{emoji:"🧾", title:"Cash crunch", text:"Selling below cost earlier left a hole in your accounts.", fx:{c:-10}},
+ moreGrants:{emoji:"🛑", title:"Grant cancelled", text:"Political unrest cuts one of your grants halfway. You relied on it.", fx:{c:-10,e:-5}},
+ badEquity:{emoji:"😤", title:"Investor pressure", text:"Your majority investor pushes you to switch to cheaper virgin plastic.", fx:{e:-10,i:-5}},
+ undercutPanda:{emoji:"🔥", title:"Price war", text:"Panda Plast answered your price cut with a bigger one.", fx:{c:-10}}
+};
+
+const ENDINGS = {
+ design:{
+  hi:["2030: The Milan Design Week darling","Plastc Lab pieces sell in galleries from Beirut to Milan. Margins are high and the brand is prestigious, though the public at home still knows little about recycling."],
+  mid:["2030: A respected boutique studio","A small, loyal premium clientele keeps the studio profitable. Growth is slow and still depends on a few designers."],
+  lo:["2030: A beautiful niche, barely alive","The pieces are stunning but the market is tiny. The founders still juggle side jobs."]},
+ factory:{
+  hi:["2030: Lebanon's recycled furniture leader","Hotels, cafés and municipalities fill the order book. Prices fell 30%, and hundreds of tonnes of plastic are recycled every year."],
+  mid:["2030: Profitable, but in a price fight","Volume is solid and the waste impact is big, but Panda Plast keeps the pressure on margins."],
+  lo:["2030: Heavy machines, thin margins","The new machinery is paid for slowly. The design identity faded and the price war bites."]},
+ movement:{
+  hi:["2030: The brand that changed minds","Thousands of students went through Plastc Lab workshops. Recycled products are now trusted, and that trust turned into sales."],
+  mid:["2030: A loved community, slowly growing","The brand is beloved and the mission is alive, but profitability is still a few years away."],
+  lo:["2030: Mission strong, money weak","People love the workshops, but investors see an NGO and cash is always tight."]}
+};
+
+/* =========================================================
+   STATE
+   ========================================================= */
+const STAT_DEF = [
+ {k:"c", n:"💵 Cash", col:"var(--mint)"},
+ {k:"i", n:"♻️ Impact", col:"var(--blue)"},
+ {k:"t", n:"🤝 Public trust", col:"var(--yellow)"},
+ {k:"e", n:"⚡ Founder energy", col:"var(--pink)"}
+];
+let S, cfg = {teams:2, timer:45, names:["Team Mint","Team Orange","Team Blue","Team Pink"]};
+let sound = true;
+const $ = s => document.querySelector(s);
+const shuffle = a => { a = a.slice(); for (let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+const pick = a => a[Math.floor(Math.random()*a.length)];
+
+/* ---------- specks bg ---------- */
+(function(){
+  const cols=["#3DDC97","#FF6B35","#4EA8DE","#FFD23F","#F25F9C"], box=$("#specks");
+  for(let i=0;i<26;i++){const e=document.createElement("i");const s=6+Math.random()*22;
+    Object.assign(e.style,{width:s+"px",height:s*.8+"px",left:Math.random()*100+"%",top:Math.random()*100+"%",background:cols[i%5],animationDelay:(-Math.random()*18)+"s",opacity:.18+Math.random()*.3});
+    box.appendChild(e);}
+})();
+
+/* ---------- setup screen ---------- */
+function renderTeamInputs(){
+  const box=$("#teamInputs"); box.innerHTML="";
+  $("#teamLabel").style.display = cfg.teams>1 ? "" : "none";
+  if(cfg.teams===1) return;
+  for(let i=0;i<cfg.teams;i++){const inp=document.createElement("input");inp.value=cfg.names[i];inp.maxLength=16;inp.oninput=()=>cfg.names[i]=inp.value||("Team "+(i+1));box.appendChild(inp);}
+}
+document.querySelectorAll("#teamSeg button").forEach(b=>b.onclick=()=>{document.querySelectorAll("#teamSeg button").forEach(x=>x.classList.remove("on"));b.classList.add("on");cfg.teams=+b.dataset.n;renderTeamInputs();});
+document.querySelectorAll("#timerSeg button").forEach(b=>b.onclick=()=>{document.querySelectorAll("#timerSeg button").forEach(x=>x.classList.remove("on"));b.classList.add("on");cfg.timer=+b.dataset.t;});
+renderTeamInputs();
+$("#startBtn").onclick=()=>{beep(660,.08);startGame();};
+
+/* ---------- build queue ---------- */
+function buildQueue(){
+  const q=[];
+  STAGES.forEach(st=>q.push({type:"q", data:pick(st.pool)}));
+  // random events: blast fixed + 3 random others, slotted near matching years
+  const fixed=RANDOM.filter(r=>r.fixed), others=shuffle(RANDOM.filter(r=>!r.fixed)).slice(0,3);
+  [...fixed,...others].forEach(r=>{
+    const yr=pick(r.years);
+    let idx=q.findIndex(x=>x.type==="q"&&x.data.year>yr); if(idx<0) idx=q.length;
+    q.splice(idx,0,{type:"rand", data:Object.assign({year:yr},r)});
+  });
+  q.push({type:"decision", data:DECISION});
+  return q;
+}
+
+function startGame(){
+  const teams = cfg.teams===1 ? [{n:"Class",p:0}] : cfg.names.slice(0,cfg.teams).map(n=>({n,p:0}));
+  S={stats:{c:40,i:20,t:30,e:80}, teams, turn:0, queue:buildQueue(), idx:-1, year:2015, flags:{}, history:[], path:null, scored:0, curYear:null};
+  $("#start").classList.add("hidden"); $("#game").classList.remove("hidden");
+  $("#feed").innerHTML="";
+  addYear(2015); addLog("Garbage piles up in Beirut. Two brothers decide to do something about it.");
+  renderStats(); renderScores(); updateProgress();
+  $("#ageLbl").textContent="Next year";
+}
+
+/* ---------- rendering ---------- */
+function renderStats(changed){
+  const box=$("#stats"); if(!box.children.length){
+    box.innerHTML=STAT_DEF.map(s=>`<div class="stat" id="st-${s.k}"><div class="row"><span class="nm">${s.n}<span class="delta"></span></span><span class="val">0</span></div><div class="bar"><div style="background:${s.col};width:0%"></div></div></div>`).join("");
+  }
+  STAT_DEF.forEach(s=>{
+    const v=S.stats[s.k], el=$("#st-"+s.k);
+    el.querySelector(".val").textContent=v;
+    el.querySelector(".bar div").style.width=v+"%";
+    if(changed&&changed[s.k]){
+      const d=changed[s.k], de=el.querySelector(".delta");
+      de.textContent=(d>0?" +":" ")+d; de.style.color=d>0?"var(--mint)":"#FF8C95"; de.classList.add("show");
+      el.classList.add(d>0?"flash-up":"flash-down");
+      setTimeout(()=>{de.classList.remove("show");el.classList.remove("flash-up","flash-down");},1800);
+    }
+  });
+  $("#bankTxt").textContent="$"+(S.stats.c*1000).toLocaleString();
+}
+function renderScores(){
+  $("#scores").innerHTML=S.teams.map((t,i)=>`<div class="score ${S.teams.length>1&&i===S.turn?"active":""}"><span class="n">${esc(t.n)}</span><span class="p">${t.p}</span></div>`).join("");
+}
+function updateProgress(){
+  const total=S.queue.length+(S.path?0:2), done=Math.max(0,S.idx+1);
+  $("#progBar").style.width=(done/total*100)+"%"; $("#progTxt").textContent=`${done} / ${total}`;
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function addYear(y){ if(S.curYear===y) return; S.curYear=y; const d=document.createElement("div");d.className="yr";d.textContent="Year "+y;$("#feed").appendChild(d);$("#yearTxt").textContent=y; scrollFeed();}
+function addLog(t,cls=""){const d=document.createElement("div");d.className="ent "+cls;d.textContent=t;$("#feed").appendChild(d);scrollFeed();}
+function scrollFeed(){const f=$("#feed");f.scrollTop=f.scrollHeight;}
+
+/* ---------- stat changes ---------- */
+function applyFx(fx){
+  const ch={};
+  Object.entries(fx||{}).forEach(([k,v])=>{const old=S.stats[k];S.stats[k]=Math.max(0,Math.min(100,old+v));ch[k]=S.stats[k]-old;});
+  renderStats(ch); return ch;
+}
+function fxChips(fx){
+  const names={c:"💵 Cash",i:"♻️ Impact",t:"🤝 Trust",e:"⚡ Energy"};
+  return Object.entries(fx||{}).filter(([k,v])=>v).map(([k,v])=>`<span class="${v>0?"u":"d"}">${names[k]} ${v>0?"+":""}${v}</span>`).join("");
+}
+
+/* ---------- flow ---------- */
+let modalState=null, timerInt=null;
+function nextEvent(){
+  if(!$("#overlay").classList.contains("hidden")) return;
+  if(S.ended){ showEnd(); return; }
+  S.idx++;
+  if(S.idx>=S.queue.length){ showEnd(); return; }
+  updateProgress();
+  const ev=S.queue[S.idx];
+  addYear(ev.data.year);
+  beep(520,.06);
+  if(ev.type==="q") showQuestion(ev.data);
+  else if(ev.type==="rand"||ev.type==="conseq") showRandom(ev);
+  else if(ev.type==="decision") showDecision(ev.data);
+}
+$("#ageBtn").onclick=()=>{$("#ageBtn").classList.remove("pulse");nextEvent();};
+
+function openModal(html){ $("#modal").innerHTML=html; $("#overlay").classList.remove("hidden"); $("#modal").scrollTop=0; }
+function closeModal(){ $("#overlay").classList.add("hidden"); stopTimer(); modalState=null; $("#ageBtn").classList.add("pulse"); }
+
+function showRandom(ev){
+  const r=ev.data, isC=ev.type==="conseq";
+  modalState={kind:"info"};
+  openModal(`<div class="mhead"><div class="memoji">${r.emoji}</div><div><div class="mmeta"><span class="pill t">${isC?"Consequence of an earlier choice":"Life event"}</span><span class="pill">${r.year}</span></div><div class="mtitle">${esc(r.title)}</div></div></div>
+   <div class="mtext">${esc(r.text)}</div>
+   <div class="result ${Object.values(r.fx).reduce((a,b)=>a+b,0)>=0?"good":"bad"}"><div class="fx" style="margin:0">${fxChips(r.fx)}</div></div>
+   <div class="mfoot"><button class="btn" id="okBtn">OK</button></div>`);
+  const sum=Object.values(r.fx).reduce((a,b)=>a+b,0);
+  sum>=0?beep(784,.12):beep(220,.15);
+  applyFx(r.fx);
+  addLog((isC?"⚠️ ":"🎲 ")+r.title+": "+r.text, isC?"bad":"evt");
+  $("#okBtn").onclick=()=>{closeModal();checkCrisis();};
+}
+
+function showQuestion(q){
+  const order=shuffle(q.choices.map((c,i)=>i));
+  modalState={kind:"q", q, order, tries:0, wrong:new Set(), done:false};
+  const team=S.teams.length>1?`<span class="pill t">${esc(S.teams[S.turn].n)}'s turn</span>`:"";
+  openModal(`<div class="mhead"><div class="memoji">${q.emoji}</div><div><div class="mmeta"><span class="pill">${q.year}</span><span class="pill c">📚 ${esc(q.tag)}</span>${team}</div><div class="mtitle">${esc(q.title)}</div></div></div>
+   <div class="mtext">${esc(q.text)}</div>
+   ${cfg.timer?`<div class="timer" id="timer"><div></div></div>`:""}
+   <div class="choices" id="choices">${order.map((ci,k)=>`<button class="ch" data-ci="${ci}"><span class="k">${k+1}</span><span>${esc(q.choices[ci].t)}</span></button>`).join("")}</div>
+   <div id="resBox"></div><div class="mfoot" id="mfoot"></div>`);
+  document.querySelectorAll("#choices .ch").forEach(b=>b.onclick=()=>answer(+b.dataset.ci,b));
+  startTimer();
+}
+
+function startTimer(){
+  stopTimer(); if(!cfg.timer) return;
+  const bar=$("#timer div"), t0=Date.now(), dur=cfg.timer*1000;
+  timerInt=setInterval(()=>{const left=Math.max(0,1-(Date.now()-t0)/dur); if(bar) bar.style.width=(left*100)+"%";
+    if(left<=0){$("#timer")&&$("#timer").classList.add("out");stopTimer();beep(300,.2);}},100);
+}
+function stopTimer(){ if(timerInt){clearInterval(timerInt);timerInt=null;} }
+
+function answer(ci, btn){
+  const m=modalState; if(!m||m.kind!=="q"||m.done||m.wrong.has(ci)) return;
+  const c=m.q.choices[ci]; m.tries++;
+  const ch=applyFx(c.fx);
+  if(c.flag && !S.flags[c.flag]){ S.flags[c.flag]=true; scheduleConseq(c.flag); }
+  if(c.best){
+    m.done=true; stopTimer();
+    const pts=[100,50,20,0][Math.min(m.tries-1,3)];
+    S.teams[S.turn].p+=pts;
+    btn.classList.add("right");
+    document.querySelectorAll("#choices .ch").forEach(b=>b.disabled=true);
+    $("#resBox").innerHTML=`<div class="result good"><h4>✅ Best move${pts?` · +${pts} pts`:""}</h4><p>${esc(c.fb)}</p><div class="fx">${fxChips(c.fx)}</div></div>`;
+    $("#mfoot").innerHTML=`<button class="btn" id="contBtn">Continue →</button>`;
+    $("#contBtn").onclick=finishQuestion;
+    S.history.push({q:m.q, tries:m.tries, best:c.t});
+    addLog("✅ "+(c.log||c.t), "good");
+    confetti(); beep(880,.1); setTimeout(()=>beep(1175,.12),110);
+    renderScores(); revealFoot();
+  } else {
+    m.wrong.add(ci); btn.classList.add("wrong"); btn.disabled=true;
+    $("#modal").classList.remove("shake"); void $("#modal").offsetWidth; $("#modal").classList.add("shake");
+    $("#resBox").innerHTML=`<div class="result bad"><h4>❌ Not the best move. Try again!</h4><p>${esc(c.fb)}</p><div class="fx">${fxChips(c.fx)}</div></div>`;
+    addLog("❌ Tried: "+c.t, "bad");
+    beep(196,.18); revealFoot();
+  }
+}
+function revealFoot(){const m=$("#modal");setTimeout(()=>m.scrollTo({top:m.scrollHeight,behavior:"smooth"}),60);}
+function finishQuestion(){
+  closeModal();
+  if(S.teams.length>1){ S.turn=(S.turn+1)%S.teams.length; renderScores(); }
+  checkCrisis();
+}
+function scheduleConseq(flag){
+  const c=CONSEQ[flag]; if(!c) return;
+  // land 1 to 2 events later, before the decision
+  const decIdx=S.queue.findIndex(x=>x.type==="decision");
+  const at=Math.min(S.idx+1+Math.ceil(Math.random()*2), decIdx);
+  const year=(S.queue[at]&&S.queue[at].data.year)||S.curYear;
+  S.queue.splice(at,0,{type:"conseq", data:Object.assign({year},c)});
+  updateProgress();
+}
+function checkCrisis(){
+  const zero=STAT_DEF.find(s=>S.stats[s.k]<=0);
+  if(!zero) return;
+  modalState={kind:"info"};
+  openModal(`<div class="mhead"><div class="memoji">🚨</div><div><div class="mmeta"><span class="pill t">Crisis</span></div><div class="mtitle">${zero.n} hit zero!</div></div></div>
+   <div class="mtext">Plastc Lab is on the brink. A last-minute emergency rescue keeps the doors open, but it costs ${S.teams.length>1?esc(S.teams[S.turn].n):"the class"} 50 points.</div>
+   <div class="mfoot"><button class="btn" id="okBtn">Survive →</button></div>`);
+  beep(150,.3);
+  S.stats[zero.k]=20; S.teams[S.turn].p=Math.max(0,S.teams[S.turn].p-50);
+  renderStats(); renderScores();
+  addLog("🚨 "+zero.n.replace(/^\S+\s/,"")+" crashed to zero. Emergency rescue.", "bad");
+  $("#okBtn").onclick=()=>{closeModal();checkCrisis();};
+}
+
+/* ---------- decision ---------- */
+function showDecision(d){
+  modalState={kind:"decision"};
+  openModal(`<div class="mhead"><div class="memoji">${d.emoji}</div><div><div class="mmeta"><span class="pill t">${esc(d.tag)}</span>${S.teams.length>1?`<span class="pill">Whole class votes</span>`:""}</div><div class="mtitle">${esc(d.title)}</div></div></div>
+   <div class="mtext">${esc(d.text)}</div>
+   <div class="paths">${d.paths.map((p,i)=>`<button class="path" data-k="${p.k}" style="border-color:${p.col}55"><div class="e">${p.e}</div><h3 style="color:${p.col}">${i+1}. ${p.n}</h3><p>${p.d}</p><div class="pc"><b style="color:var(--mint)">+ PROS</b>${p.pro}<b style="color:#FF8C95">– CONS</b>${p.con}</div></button>`).join("")}</div>`);
+  document.querySelectorAll(".path").forEach(b=>b.onclick=()=>choosePath(b.dataset.k));
+}
+function choosePath(k){
+  const p=DECISION.paths.find(x=>x.k===k);
+  S.path=k; applyFx(p.fx); confetti(); beep(988,.15);
+  addLog(`🧭 July 2024: Plastc Lab becomes ${/^[aeiou]/i.test(p.n)?"an":"a"} ${p.n.toLowerCase()}.`, "good");
+  S.history.push({q:{title:"The big decision",tag:"July 2024"}, tries:0, best:p.n, path:true, learn:"No single right answer: each option trades profitability, impact and mission differently."});
+  PATHQ[k].forEach(q=>S.queue.push({type:"q",data:q}));
+  closeModal(); updateProgress();
+}
+
+/* ---------- end ---------- */
+function showEnd(){
+  S.ended=true;
+  const avg=(S.stats.c+S.stats.i+S.stats.t+S.stats.e)/4;
+  const tier=avg>=60?"hi":avg>=40?"mid":"lo";
+  const [vt,vx]=ENDINGS[S.path||"design"][tier];
+  const qs=S.history.filter(h=>!h.path), first=qs.filter(h=>h.tries===1).length;
+  const ranked=S.teams.map((t,i)=>({...t,i})).sort((a,b)=>b.p-a.p);
+  const medals=["🥇","🥈","🥉","🏅"];
+  const pathInfo=DECISION.paths.find(p=>p.k===S.path);
+  $("#game").classList.add("hidden");
+  const e=$("#end"); e.classList.remove("hidden");
+  e.innerHTML=`<div class="kicker">Game over · Plastc Lab in 2030</div>
+   <div class="endgrid">
+    <div class="card"><div class="pill" style="display:inline-block;background:#ffffff11">${pathInfo?pathInfo.e+" "+pathInfo.n:""}</div>
+      <h1 class="verdict">${esc(vt)}</h1><p class="epi">${esc(vx)}</p>
+      <div class="statsum">${STAT_DEF.map(s=>`<div><b style="color:${s.col}">${S.stats[s.k]}</b><span>${s.n}</span></div>`).join("")}</div>
+      <p class="epi" style="margin-top:1.2rem;color:var(--muted)">Best answer on the first try: <b style="color:var(--mint)">${first} of ${qs.length}</b></p>
+    </div>
+    <div class="card board"><h2 style="font-size:1.8rem;margin-bottom:.6rem">${S.teams.length>1?"🏆 Leaderboard":"🏆 Class score"}</h2>
+      ${ranked.map((t,k)=>`<div class="rowx"><span class="medal">${medals[k]||""}</span><span>${esc(t.n)}</span><span class="pts">${t.p}</span></div>`).join("")}
+      ${S.teams.length>1?`<p class="epi" style="margin-top:1rem">🍫 <b>${esc(ranked[0].n)}</b> runs Plastc Lab best!</p>`:""}
+      <button class="big" id="againBtn" style="margin-top:1.4rem">Play again (new random run)</button>
+    </div>
+   </div>
+   <div class="recap"><h2>📚 The best answers</h2>
+    ${S.history.map((h,k)=>`<div class="rq"><span class="num">${k+1}</span><div><div class="q">${esc(h.q.title)} <span class="pill c" style="margin-left:.4rem">${esc(h.q.tag)}</span></div><div class="a">${h.path?"Your choice: ":"✔ "}${esc(h.best)}</div><div class="l">${esc(h.path?h.learn:h.q.learn)}</div></div>${h.path?"":`<span class="tries ${h.tries===1?"t1":h.tries===2?"t2":"t3"}">${h.tries===1?"1st try":h.tries+" tries"}</span>`}</div>`).join("")}
+   </div>`;
+  window.scrollTo(0,0); confetti(220); beep(784,.12); setTimeout(()=>beep(988,.12),130); setTimeout(()=>beep(1319,.2),260);
+  $("#againBtn").onclick=()=>{e.classList.add("hidden");$("#start").classList.remove("hidden");$("#stats").innerHTML="";};
+}
+
+/* ---------- keyboard ---------- */
+document.addEventListener("keydown",ev=>{
+  if($("#game").classList.contains("hidden")) return;
+  const open=!$("#overlay").classList.contains("hidden");
+  if(open && modalState){
+    if(modalState.kind==="q" && !modalState.done && /^[1-4]$/.test(ev.key)){
+      const b=document.querySelectorAll("#choices .ch")[+ev.key-1]; if(b&&!b.disabled) b.click(); return;
+    }
+    if(modalState.kind==="decision" && /^[1-3]$/.test(ev.key)){ document.querySelectorAll(".path")[+ev.key-1].click(); return; }
+    if(ev.key==="Enter"){ const b=$("#contBtn")||$("#okBtn"); if(b){ev.preventDefault();b.click();} }
+  } else if(!open && (ev.key===" "||ev.key==="Enter")){ ev.preventDefault(); $("#ageBtn").click(); }
+});
+
+/* ---------- sound ---------- */
+let actx=null;
+function beep(f,d){ if(!sound) return; try{ actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+  const o=actx.createOscillator(), g=actx.createGain(); o.type="triangle"; o.frequency.value=f;
+  g.gain.setValueAtTime(.12,actx.currentTime); g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+d+.05);
+  o.connect(g).connect(actx.destination); o.start(); o.stop(actx.currentTime+d+.06);}catch(e){} }
+$("#soundBtn").onclick=()=>{sound=!sound;$("#soundBtn").textContent=sound?"🔊":"🔇";};
+$("#fsBtn").onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{});}catch(e){}};
+
+/* ---------- confetti ---------- */
+const cv=$("#confetti"), cx=cv.getContext("2d"); let parts=[];
+function sizeCv(){cv.width=innerWidth;cv.height=innerHeight;} sizeCv(); addEventListener("resize",sizeCv);
+function confetti(n=90){const cols=["#3DDC97","#FF6B35","#4EA8DE","#FFD23F","#F25F9C"];
+  for(let i=0;i<n;i++) parts.push({x:innerWidth/2+(Math.random()-.5)*300,y:innerHeight*.45,vx:(Math.random()-.5)*16,vy:-Math.random()*16-4,s:5+Math.random()*9,c:cols[i%5],r:Math.random()*6,vr:(Math.random()-.5)*.3,life:110});
+  if(parts.length===n) requestAnimationFrame(tick);}
+function tick(){cx.clearRect(0,0,cv.width,cv.height);
+  parts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.45;p.vx*=.99;p.r+=p.vr;p.life--;cx.save();cx.translate(p.x,p.y);cx.rotate(p.r);cx.fillStyle=p.c;cx.globalAlpha=Math.max(0,p.life/110);cx.beginPath();cx.ellipse(0,0,p.s,p.s*.7,0,0,7);cx.fill();cx.restore();});
+  parts=parts.filter(p=>p.life>0&&p.y<innerHeight+40); if(parts.length) requestAnimationFrame(tick); else cx.clearRect(0,0,cv.width,cv.height);}
+</script>
+</body>
+</html>
